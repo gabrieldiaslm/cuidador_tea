@@ -1,0 +1,41 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+  <h1>Histórico de Avaliações de {{ profile.name }}</h1>
+  
+  {% for result in results %}
+    <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px;">
+      <h3>{{ result.assessment.title }}</h3>
+      <p><em>Concluído em: {{ result.completed_at|date:"d/m/Y H:i" }}</em></p>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Seção</th>
+            <th>Pontuação</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for section_result in result.section_results.all %}
+            <tr>
+              <td>{{ section_result.section.title }}</td>
+              <td>{{ section_result.score }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th>Pontuação Total</th>
+            <th>{{ result.get_total_score }}</th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  {% empty %}
+    <p>Você ainda não completou nenhuma avaliação.</p>
+  {% endfor %}
+  
+  <br>
+  <a href="{% url 'assessment_list' %}">Ver avaliações disponíveis</a>
+  <a href="{% url 'home' %}">Voltar para a Home</a>
+{% endblock %}

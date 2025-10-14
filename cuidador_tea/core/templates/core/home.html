@@ -1,0 +1,15 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+  <h1>Bem-vindo, {{ profile.name }}!</h1>
+  <p>Este é o conteúdo da plataforma.</p>
+  
+  <nav>
+    <ul>
+      <li><a href="{% url 'assessment_list' %}">Fazer uma Avaliação</a></li>
+      <li><a href="{% url 'assessment_history' %}">Ver Meu Histórico</a></li>
+      <li><a href="{% url 'profile_select' %}">Trocar de perfil</a></li>
+      <li><a href="{% url 'logout' %}">Sair</a></li>
+    </ul>
+  </nav>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+  <h1>Selecionar Criança?</h1>
+  <div>
+    {% for profile in profiles %}
+      <a href="{% url 'select_profile_and_redirect' profile.id %}">
+        <div>
+          <p>{{ profile.name }}</p>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+  <hr>
+  <a href="{% url 'profile_create' %}">Adicionar Perfil</a> | <a href="{% url 'logout' %}">Sair da Conta</a>
+{% endblock %}

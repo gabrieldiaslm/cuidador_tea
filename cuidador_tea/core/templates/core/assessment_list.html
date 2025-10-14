@@ -1,0 +1,18 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+  <h1>Avaliações Disponíveis para {{ profile.name }}</h1>
+  
+  {% for assessment in assessments %}
+    <div>
+      <h2>{{ assessment.title }}</h2>
+      <p>{{ assessment.description|default:"Sem descrição." }}</p>
+      <a href="{% url 'take_assessment' assessment.id %}">Iniciar Avaliação</a>
+    </div>
+    <hr>
+  {% empty %}
+    <p>Nenhuma avaliação disponível no momento.</p>
+  {% endfor %}
+  
+  <a href="{% url 'home' %}">Voltar para a Home</a>
+{% endblock %}

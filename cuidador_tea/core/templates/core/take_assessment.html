@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+  <h1>{{ assessment.title }}</h1>
+  <p>Respondendo como: {{ profile.name }}</p>
+
+  <form method="post">
+    {% csrf_token %}
+    
+    {% for section in assessment.sections.all %}
+      <h2>{{ section.title }}</h2>
+      <hr>
+      {% for question in section.questions.all %}
+        <fieldset style="margin-bottom: 20px;">
+          <legend>{{ forloop.parentloop.counter }}.{{ forloop.counter }}. {{ question.text }}</legend>
+          
+          <div>
+            <input type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_0" value="0" required>
+            <label for="q{{ question.id }}_0">0</label>
+          </div>
+          <div>
+            <input type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_1" value="1" required>
+            <label for="q{{ question.id }}_1">1</label>
+          </div>
+          <div>
+            <input type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_2" value="2" required>
+            <label for="q{{ question.id }}_2">2</label>
+          </div>
+          
+        </fieldset>
+      {% endfor %}
+    {% endfor %}
+    
+    <button type="submit">Finalizar Avaliação</button>
+  </form>
+{% endblock %}
