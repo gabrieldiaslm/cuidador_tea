@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from .models import Profile
 from .forms import ProfileForm # Criaremos este formulário a seguir
-
+from .models import Assessment, AssessmentResult, SectionResult
 
 
 def index(request):
@@ -108,33 +108,26 @@ def assessment_list(request):
 @login_required
 @profile_required
 def take_assessment(request, assessment_id):
-    """Exibe e processa o formulário de uma avaliação dividida em seções."""
     assessment = get_object_or_404(Assessment.objects.prefetch_related('sections__questions'), id=assessment_id)
     profile = Profile.objects.get(id=request.session['selected_profile_id'])
 
     if request.method == 'POST':
-        # 1. Cria o registro principal do resultado
         assessment_result = AssessmentResult.objects.create(
             profile=profile,
             assessment=assessment
         )
-
-        # 2. Itera sobre cada seção para calcular e salvar sua pontuação
         for section in assessment.sections.all():
             section_score = 0
             for question in section.questions.all():
-                # A resposta virá como '0', '1' ou '2'
                 answer_value = request.POST.get(f'question_{question.id}')
                 if answer_value:
                     section_score += int(answer_value)
             
-            # 3. Salva o resultado da seção
             SectionResult.objects.create(
                 assessment_result=assessment_result,
                 section=section,
                 score=section_score
             )
-        
         return redirect('assessment_history')
 
     return render(request, 'core/take_assessment.html', {'assessment': assessment, 'profile': profile})
@@ -142,8 +135,6 @@ def take_assessment(request, assessment_id):
 @login_required
 @profile_required
 def assessment_history(request):
-    """Exibe o histórico de avaliações do perfil, agora com detalhes por seção."""
     profile = Profile.objects.get(id=request.session['selected_profile_id'])
-    # Usamos prefetch_related para otimizar a consulta ao banco de dados
     results = profile.assessment_results.prefetch_related('section_results__section').all()
     return render(request, 'core/assessment_history.html', {'results': results, 'profile': profile})

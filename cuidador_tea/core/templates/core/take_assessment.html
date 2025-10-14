@@ -13,20 +13,9 @@
       {% for question in section.questions.all %}
         <fieldset style="margin-bottom: 20px;">
           <legend>{{ forloop.parentloop.counter }}.{{ forloop.counter }}. {{ question.text }}</legend>
-          
-          <div>
-            <input type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_0" value="0" required>
-            <label for="q{{ question.id }}_0">0</label>
-          </div>
-          <div>
-            <input type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_1" value="1" required>
-            <label for="q{{ question.id }}_1">1</label>
-          </div>
-          <div>
-            <input type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_2" value="2" required>
-            <label for="q{{ question.id }}_2">2</label>
-          </div>
-          
+          <div><input type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_0" value="0" required><label for="q{{ question.id }}_0"> 0</label></div>
+          <div><input type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_1" value="1" required><label for="q{{ question.id }}_1"> 1</label></div>
+          <div><input type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_2" value="2" required><label for="q{{ question.id }}_2"> 2</label></div>
         </fieldset>
       {% endfor %}
     {% endfor %}

@@ -6,42 +6,32 @@ from .models import (
     AssessmentResult, SectionResult
 )
 
-# ------------------------------------------------------------------
-# VERIFIQUE ESTA PARTE COM MUITA ATENÇÃO
-# ------------------------------------------------------------------
-
-# PRIMEIRO: A classe QuestionInline tem de ser definida.
-class QuestionInline(admin.TabularInline):
-    model = Question
-    extra = 5
-
-# SEGUNDO: A classe SectionInline tem de ser definida E
-# DEVE conter a linha 'inlines = [QuestionInline]'
-class SectionInline(admin.StackedInline):
-    model = Section
-    inlines = [QuestionInline]  # <-- ESTA LINHA É A MAIS IMPORTANTE!
-    extra = 1
-
+# 1. Registamos o modelo Assessment de forma simples.
 @admin.register(Assessment)
 class AssessmentAdmin(admin.ModelAdmin):
-    inlines = [SectionInline] # Esta parte parece estar a funcionar, pois vê as secções.
     list_display = ('title', 'description')
 
-# ------------------------------------------------------------------
-# O resto do ficheiro
-# ------------------------------------------------------------------
+# 2. Criamos uma página de admin para as Secções.
+@admin.register(Section)
+class SectionAdmin(admin.ModelAdmin):
+    # Mostra colunas úteis na lista de secções.
+    list_display = ('title', 'assessment', 'order')
+    # Permite filtrar as secções pela avaliação a que pertencem.
+    list_filter = ('assessment',)
 
-class SectionResultInline(admin.TabularInline):
-    model = SectionResult
-    readonly_fields = ('section', 'score')
-    can_delete = False
-    extra = 0
+# 3. Criamos uma página de admin para as Perguntas.
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = ('text', 'section')
+    list_filter = ('section__assessment', 'section') # Permite filtrar por avaliação ou secção
+    search_fields = ('text',) # Adiciona uma barra de pesquisa
 
+# O resto do ficheiro permanece igual.
 @admin.register(AssessmentResult)
 class AssessmentResultAdmin(admin.ModelAdmin):
-    inlines = [SectionResultInline]
     list_display = ('profile', 'assessment', 'completed_at')
-    list_filter = ('assessment', 'profile__user')
     readonly_fields = ('profile', 'assessment', 'completed_at')
+
+# ... (outras classes de admin, como SectionResultInline, se ainda as quiser) ...
 
 admin.site.register(Profile)

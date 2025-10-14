@@ -9,30 +9,17 @@
       <p><em>Concluído em: {{ result.completed_at|date:"d/m/Y H:i" }}</em></p>
       
       <table>
-        <thead>
-          <tr>
-            <th>Seção</th>
-            <th>Pontuação</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Secção</th><th>Pontuação</th></tr></thead>
         <tbody>
           {% for section_result in result.section_results.all %}
-            <tr>
-              <td>{{ section_result.section.title }}</td>
-              <td>{{ section_result.score }}</td>
-            </tr>
+            <tr><td>{{ section_result.section.title }}</td><td>{{ section_result.score }}</td></tr>
           {% endfor %}
         </tbody>
-        <tfoot>
-          <tr>
-            <th>Pontuação Total</th>
-            <th>{{ result.get_total_score }}</th>
-          </tr>
-        </tfoot>
+        <tfoot><tr><th>Pontuação Total</th><th>{{ result.get_total_score }}</th></tr></tfoot>
       </table>
     </div>
   {% empty %}
-    <p>Você ainda não completou nenhuma avaliação.</p>
+    <p>Ainda não completou nenhuma avaliação.</p>
   {% endfor %}
   
   <br>
