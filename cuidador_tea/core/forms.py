@@ -6,7 +6,7 @@ from .models import Profile
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['name'] 
-        labels = {
-            'name': 'Nome do Perfil',
+        fields = ['name', 'data_nascimento', 'grau_autismo', 'tem_laudo']
+        widgets = {
+            'data_nascimento': forms.DateInput(attrs={'type': 'date'}),
         }

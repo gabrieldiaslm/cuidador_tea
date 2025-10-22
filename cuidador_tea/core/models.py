@@ -6,7 +6,22 @@ from django.contrib.auth.models import User
 class Profile(models.Model):
     # Esta linha garante que cada perfil PERTENCE a um único usuário.
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='profiles')
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=255, verbose_name="Nome Completo")
+
+    GRAU_AUTISMO_CHOICES = [
+        ('1', 'Nível 1 - Leve'),
+        ('2', 'Nível 2 - Moderado'),
+        ('3', 'Nível 3 - Severo'),
+    ]
+
+    data_nascimento = models.DateField(verbose_name="Data de Nascimento")
+    grau_autismo = models.CharField(
+        max_length=1,
+        choices=GRAU_AUTISMO_CHOICES,
+        verbose_name="Grau de Autismo"
+    )
+    tem_laudo = models.BooleanField(default=False, verbose_name="Possui laudo médico?")
+    is_active = models.BooleanField(default=True, verbose_name="Está ativo?")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

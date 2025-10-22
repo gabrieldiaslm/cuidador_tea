@@ -1,18 +1,25 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-  <h1>Bem-vindo, {{ profile.name }}!</h1>
-  <p>Este é o conteúdo da plataforma.</p>
+  <h1>Bem-vindo(a), {{ profile.name }}!</h1>
+  <p>Este é o conteúdo principal da plataforma.</p>
+  <p><a href="{% url 'assessment_list' %}">Ver avaliações disponíveis</a></p>
+  <p><a href="{% url 'assessment_history' %}">Ver histórico de avaliações</a></p>
   
-  <nav>
-    <ul>
-      <li><a href="{% url 'assessment_list' %}">Fazer uma Avaliação</a></li>
-      <li><a href="{% url 'assessment_history' %}">Ver Meu Histórico</a></li>
-      <li><a href="{% url 'profile_select' %}">Trocar de perfil</a></li>
-      <li><form method="post" action="{% url 'logout' %}" style="display: inline;">
-    {% csrf_token %}
-    <button type="submit">Sair</button>
-</form></li>
-    </ul>
-  </nav>
+  <hr style="margin: 20px 0;">
+  
+  <div>
+    <h3>Gerenciar Perfil</h3>
+    <a href="{% url 'profile_detail' profile.id %}" class="button">Ver Detalhes</a>
+  </div>
+  
+  <hr style="margin: 20px 0;">
+  
+  <a href="{% url 'profile_select' %}">Trocar de Perfil</a>
+  
+  <form method="post" action="{% url 'logout' %}" style="display: inline; margin-left: 15px;">
+      {% csrf_token %}
+      <button type="submit" class="button danger">Sair da Conta</button>
+  </form>
+
 {% endblock %}

@@ -1,7 +1,8 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-  <h2>Criar Novo Perfil</h2>
+  <h2>{% if is_editing %}Editar Perfil{% else %}Criar Novo Perfil{% endif %}</h2>
+  
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}

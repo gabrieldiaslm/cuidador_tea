@@ -31,7 +31,7 @@ def signup(request):
 @login_required
 def profile_select(request):
     """Exibe a tela 'selecionar perfil?'."""
-    profiles = request.user.profiles.all()
+    profiles = request.user.profiles.filter(is_active=True)
     return render(request, 'core/profile_select.html', {'profiles': profiles})
 
 @login_required
@@ -138,3 +138,41 @@ def assessment_history(request):
     profile = Profile.objects.get(id=request.session['selected_profile_id'])
     results = profile.assessment_results.prefetch_related('section_results__section').all()
     return render(request, 'core/assessment_history.html', {'results': results, 'profile': profile})
+
+# CRUD PERFIL --------
+# READ - Ver Detalhes do Perfil
+@login_required
+def profile_detail(request, profile_id):
+    profile = get_object_or_404(Profile, id=profile_id, user=request.user, is_active=True)
+    # A verificação 'user=request.user' garante que um utilizador não pode ver perfis de outra conta
+    return render(request, 'core/profile_detail.html', {'profile': profile})
+
+# UPDATE - Editar Perfil
+@login_required
+def profile_update(request, profile_id):
+    profile = get_object_or_404(Profile, id=profile_id, user=request.user, is_active=True)
+    
+    if request.method == 'POST':
+        # Passamos 'instance=profile' para que o formulário saiba que está a editar um perfil existente
+        form = ProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile_select') # Volta para a seleção de perfis após salvar
+    else:
+        # Quando a página é carregada (GET), o formulário é preenchido com os dados atuais do perfil
+        form = ProfileForm(instance=profile)
+        
+    return render(request, 'core/profile_form.html', {'form': form, 'is_editing': True})
+
+# DELETE - Agora funciona como "Arquivar" Perfil
+@login_required
+def profile_delete(request, profile_id):
+    profile = get_object_or_404(Profile, id=profile_id, user=request.user, is_active=True)
+    
+    if request.method == 'POST':
+        profile.is_active = False
+        profile.save()
+        return redirect('profile_select')
+        
+    # Podemos continuar a usar o mesmo template de confirmação, mas vamos mudar o texto nele.
+    return render(request, 'core/profile_delete_confirm.html', {'profile': profile})

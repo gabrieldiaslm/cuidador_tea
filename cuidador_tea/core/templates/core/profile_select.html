@@ -1,16 +1,20 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-  <h1>Selecionar Criança?</h1>
-  <div>
+  <h1>Selecionar Criança</h1>
+  
+  <div class="profile-grid">
     {% for profile in profiles %}
-      <a href="{% url 'select_profile_and_redirect' profile.id %}">
-        <div>
-          <p>{{ profile.name }}</p>
-        </div>
-      </a>
+      <div class="profile-card">
+        <a href="{% url 'select_profile_and_redirect' profile.id %}">
+          <h2>{{ profile.name }}</h2>
+        </a>
+        <hr style="margin: 10px 0;">
+        <a href="{% url 'profile_detail' profile.id %}">Gerir Perfil</a>
+      </div>
     {% endfor %}
   </div>
-  <hr>
-  <a href="{% url 'profile_create' %}">Adicionar Perfil</a> | <a href="{% url 'logout' %}">Sair da Conta</a>
-{% endblock %}
+  
+  <hr style="margin: 20px 0;">
+  <a href="{% url 'profile_create' %}" class="button">Adicionar Novo Perfil</a>
+  {% endblock %}

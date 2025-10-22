@@ -11,7 +11,19 @@ urlpatterns = [
     # Seleção e gerenciamento de perfis
     path('profiles/', views.profile_select, name='profile_select'),
     path('profiles/select/<int:profile_id>/', views.select_profile_and_redirect, name='select_profile_and_redirect'),
+    
+    # --- CRUD dos Perfis ---
+    
     path('profiles/create/', views.profile_create, name='profile_create'),
+    
+    # Read (Ver detalhes de um perfil) - NOVA
+    path('profiles/<int:profile_id>/', views.profile_detail, name='profile_detail'),
+    
+    # Update (Editar um perfil) - NOVA
+    path('profiles/<int:profile_id>/edit/', views.profile_update, name='profile_update'),
+    
+    # Delete (Apagar um perfil) - NOVA
+    path('profiles/<int:profile_id>/delete/', views.profile_delete, name='profile_delete'),
 
     # Página principal
     path('home/', views.home, name='home'),
