@@ -79,17 +79,8 @@ WSGI_APPLICATION = 'cuidador_tea.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'cuidador_tea_db',  # O nome do banco que você criou
-        'USER': 'user_tea',   # O usuário que você criou
-        'PASSWORD': 'user_tea',       # A senha que você definiu
-        'HOST': 'localhost',             # Ou 127.0.0.1. Mude se seu banco estiver em outro servidor.
-        'PORT': '3306',                  # A porta padrão do MySQL.
-        # Adicione esta opção para garantir a codificação correta.
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            'charset': 'utf8mb4',
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
