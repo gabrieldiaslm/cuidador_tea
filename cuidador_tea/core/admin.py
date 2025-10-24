@@ -3,7 +3,7 @@
 from django.contrib import admin
 from .models import (
     Profile, Assessment, Section, Question, 
-    AssessmentResult, SectionResult
+    AssessmentResult
 )
 
 # 1. Registamos o modelo Assessment de forma simples.
@@ -22,7 +22,7 @@ class SectionAdmin(admin.ModelAdmin):
 # 3. Criamos uma página de admin para as Perguntas.
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('text', 'section')
+    list_display = ('text', 'info_text', 'section')
     list_filter = ('section__assessment', 'section') # Permite filtrar por avaliação ou secção
     search_fields = ('text',) # Adiciona uma barra de pesquisa
 
@@ -31,7 +31,5 @@ class QuestionAdmin(admin.ModelAdmin):
 class AssessmentResultAdmin(admin.ModelAdmin):
     list_display = ('profile', 'assessment', 'completed_at')
     readonly_fields = ('profile', 'assessment', 'completed_at')
-
-# ... (outras classes de admin, como SectionResultInline, se ainda as quiser) ...
 
 admin.site.register(Profile)

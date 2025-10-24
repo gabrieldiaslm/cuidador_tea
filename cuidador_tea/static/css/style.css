@@ -163,3 +163,47 @@ th, td {
 thead {
     background-color: var(--cor-fundo);
 }
+
+/* === QUESTIONÁRIO - BOTÃO DE INFORMAÇÃO (ADICIONE ESTE BLOCO) === */
+
+.info-btn {
+    /* Formato e tamanho */
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+
+    /* Estilo */
+    border: 1px solid var(--cor-primaria);
+    background-color: var(--cor-branco);
+    color: var(--cor-primaria);
+    
+    /* Tipografia */
+    font-weight: bold;
+    font-family: serif;
+    
+    /* Funcionalidade */
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    /* --- ADICIONE ESTAS 3 LINHAS PARA CENTRALIZAR --- */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.info-btn:hover {
+    background-color: var(--cor-primaria);
+    color: var(--cor-branco);
+}
+
+.info-text {
+    padding: 15px;
+    margin: 15px 0;
+    background-color: #e9ecef; /* Cor de fundo suave */
+    border-left: 4px solid var(--cor-primaria);
+    border-radius: 4px;
+}
+
+.hidden {
+    display: none; /* Classe para esconder o texto (usada pelo JavaScript) */
+}

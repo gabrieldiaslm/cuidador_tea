@@ -52,7 +52,12 @@ class Section(models.Model):
 class Question(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='questions')
     text = models.CharField(max_length=500, verbose_name="Texto da Pergunta")
-
+    info_text = models.TextField(
+        blank=True, # O campo é opcional
+        null=True,  # Permite que o campo seja nulo na base de dados
+        verbose_name="Texto de Informação (Ajuda)",
+        help_text="Este texto aparecerá quando o utilizador clicar no botão 'i'."
+    )
     def __str__(self):
         return self.text
 

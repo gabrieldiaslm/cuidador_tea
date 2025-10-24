@@ -10,5 +10,39 @@
         {% block content %}
         {% endblock %}
     </main>
+
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Seleciona todos os botões de informação
+            const infoButtons = document.querySelectorAll('.info-btn');
+            
+            // Seleciona todos os contentores de texto de informação
+            const allInfoTexts = document.querySelectorAll('.info-text');
+
+            infoButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Obtém o ID do alvo a partir do atributo data-target
+                    const targetId = this.dataset.target;
+                    const targetText = document.getElementById(targetId);
+
+                    // Verifica se o alvo que clicámos já está visível
+                    const isCurrentlyVisible = !targetText.classList.contains('hidden');
+
+                    // 1. Esconde TODOS os textos de informação
+                    allInfoTexts.forEach(text => {
+                        text.classList.add('hidden');
+                    });
+
+                    // 2. Se o alvo NÃO estava visível antes, mostra-o.
+                    // (Isto cria o efeito de toggle e garante que só um fica aberto)
+                    if (!isCurrentlyVisible) {
+                        targetText.classList.remove('hidden');
+                    }
+                });
+            });
+        });
+    </script>
+
 </body>
+
 </html>

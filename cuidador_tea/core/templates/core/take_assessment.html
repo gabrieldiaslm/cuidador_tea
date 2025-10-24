@@ -11,12 +11,25 @@
       <h2>{{ section.title }}</h2>
       <hr>
       {% for question in section.questions.all %}
-        <fieldset style="margin-bottom: 20px;">
-          <legend>{{ forloop.parentloop.counter }}.{{ forloop.counter }}. {{ question.text }}</legend>
-          <div><input type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_0" value="0" required><label for="q{{ question.id }}_0"> 0</label></div>
-          <div><input type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_1" value="1" required><label for="q{{ question.id }}_1"> 1</label></div>
-          <div><input type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_2" value="2" required><label for="q{{ question.id }}_2"> 2</label></div>
-        </fieldset>
+       <fieldset style="margin-bottom: 20px;">
+    <legend style="display: flex; align-items: center; gap: 10px;">
+        <span>{{ forloop.parentloop.counter }}.{{ forloop.counter }}. {{ question.text }}</span>
+        
+        {% if question.info_text %}
+        <button type="button" class="info-btn" data-target="info-{{ question.id }}">i</button>
+        {% endif %}
+    </legend>
+
+    {% if question.info_text %}
+    <div id="info-{{ question.id }}" class="info-text hidden">
+        <p>{{ question.info_text|linebreaksbr }}</p>
+    </div>
+    {% endif %}
+
+    <div><input type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_0" value="0" required><label for="q{{ question.id }}_0"> 0</label></div>
+    <div><input type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_1" value="1" required><label for="q{{ question.id }}_1"> 1</label></div>
+    <div><input type="radio" name="question_{{ question.id }}" id="q{{ question.id }}_2" value="2" required><label for="q{{ question.id }}_2"> 2</label></div>
+</fieldset>
       {% endfor %}
     {% endfor %}
     
