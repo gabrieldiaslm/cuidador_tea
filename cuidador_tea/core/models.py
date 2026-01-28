@@ -41,13 +41,18 @@ class Assessment(models.Model):
 class Section(models.Model):
     assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name='sections')
     title = models.CharField(max_length=200, verbose_name="Título da Secção")
-    order = models.PositiveIntegerField(help_text="A ordem em que a secção aparece (1, 2, 3...).")
+    order = models.PositiveIntegerField()
+
+    # --- NOVOS CAMPOS PARA AS DICAS ---
+    tip_low = models.TextField(verbose_name="Dica para nota baixa (0-4)", blank=True)
+    tip_medium = models.TextField(verbose_name="Dica para nota média (5-6)", blank=True)
+    tip_high = models.TextField(verbose_name="Dica para nota alta (7-10)", blank=True)
 
     class Meta:
         ordering = ['order']
 
     def __str__(self):
-        return f"{self.assessment.title} - {self.title}"
+        return self.title
 
 class Question(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='questions')
@@ -71,11 +76,37 @@ class AssessmentResult(models.Model):
 
     def get_total_score(self):
         return sum(result.score for result in self.section_results.all())
+    
+def get_previous_result(self):
+        """Busca a última avaliação deste perfil antes da atual"""
+        return AssessmentResult.objects.filter(
+            profile=self.profile,
+            assessment=self.assessment,
+            completed_at__lt=self.completed_at
+        ).order_by('-completed_at').first()
 
 class SectionResult(models.Model):
     assessment_result = models.ForeignKey(AssessmentResult, on_delete=models.CASCADE, related_name='section_results')
     section = models.ForeignKey(Section, on_delete=models.PROTECT)
-    score = models.IntegerField(verbose_name="Pontuação da Secção")
+    score = models.IntegerField(verbose_name="Pontuação")
 
-    def __str__(self):
-        return f"{self.section.title}: {self.score} pontos"
+    def get_tip(self):
+        """Retorna a dica baseada na pontuação obtida na secção"""
+        if self.score <= 4:
+            return self.section.tip_low
+        elif self.score <= 6:
+            return self.section.tip_medium
+        else:
+            return self.section.tip_high
+    
+def get_comparison(self):
+        """Calcula a diferença de nota com a avaliação anterior"""
+        prev_assessment = self.assessment_result.get_previous_result()
+        if prev_assessment:
+            prev_sec_res = SectionResult.objects.filter(
+                assessment_result=prev_assessment,
+                section=self.section
+            ).first()
+            if prev_sec_res:
+                return self.score - prev_sec_res.score
+        return None

@@ -1,28 +1,138 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-  <h1>Histórico de Avaliações de {{ profile.name }}</h1>
-  
+  <h1>Histórico de Avaliações</h1>
+  <p>Perfil: <strong>{{ profile.name }}</strong></p>
+
+  {% if results %}
+  <details class="assessment-accordion chart-accordion" style="border-left: 5px solid var(--cor-primaria); margin-bottom: 25px;">
+      <summary class="assessment-summary" style="background-color: #f0f7ff;">
+        <div class="summary-info">
+          <span class="summary-title">📈 Evolução de Pontuação Geral</span>
+        </div>
+        <div class="summary-score">
+          <span class="icon">▼</span>
+        </div>
+      </summary>
+      <div class="assessment-details">
+          <div class="chart-container" style="position: relative; height:250px; width:100%">
+              <canvas id="evolutionChart"></canvas>
+          </div>
+      </div>
+  </details>
+  {% endif %}
+
   {% for result in results %}
-    <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px;">
-      <h3>{{ result.assessment.title }}</h3>
-      <p><em>Concluído em: {{ result.completed_at|date:"d/m/Y H:i" }}</em></p>
-      
-      <table>
-        <thead><tr><th>Secção</th><th>Pontuação</th></tr></thead>
-        <tbody>
-          {% for section_result in result.section_results.all %}
-            <tr><td>{{ section_result.section.title }}</td><td>{{ section_result.score }}</td></tr>
+    <details class="assessment-accordion">
+      <summary class="assessment-summary">
+        <div class="summary-info">
+          <span class="summary-date">{{ result.completed_at|date:"d/m/Y" }}</span>
+          <span class="summary-title">{{ result.assessment.title }}</span>
+        </div>
+        <div class="summary-score">
+          <strong>Nota: {{ result.get_total_score }}</strong>
+          <span class="icon">▼</span>
+        </div>
+      </summary>
+
+      <div class="assessment-details">
+        <div class="section-results-grid">
+          {% for sec_res in result.section_results.all %}
+            <div class="section-box" style="border-left-color: 
+              {% if sec_res.score <= 3 %}#dc3545
+              {% elif sec_res.score <= 6 %}#ffc107
+              {% else %}#28a745{% endif %};">
+              
+              <div class="section-header-row" style="display: flex; justify-content: space-between; align-items: center;">
+                <strong>{{ sec_res.section.title }}</strong>
+                
+                {% with diff=sec_res.get_comparison %}
+                  {% if diff is not None %}
+                    {% if diff > 0 %}
+                      <span class="trend up">▲ +{{ diff }}</span>
+                    {% elif diff < 0 %}
+                      <span class="trend down">▼ {{ diff }}</span>
+                    {% else %}
+                      <span class="trend stable">=</span>
+                    {% endif %}
+                  {% endif %}
+                {% endwith %}
+              </div>
+
+              <div class="progress-container">
+                <div class="progress-bar 
+                  {% if sec_res.score <= 3 %}bg-red
+                  {% elif sec_res.score <= 6 %}bg-yellow 
+                  {% else %}bg-green{% endif %}" 
+                  style="width: {{ sec_res.score }}0%;">
+                </div>
+              </div>
+              
+              <div class="score-display">
+                <span>Nota: <strong>{{ sec_res.score }}/10</strong></span>
+              </div>
+
+              <details class="tip-accordion">
+                  <summary class="tip-header">
+                      <span>💡 Ver Dica Pedagógica</span>
+                      <span class="icon">▼</span>
+                  </summary>
+                  <div class="tip-content">
+                      <p>{{ sec_res.get_tip|default:"Sem orientações para esta pontuação." }}</p>
+                  </div>
+              </details>
+            </div>
           {% endfor %}
-        </tbody>
-        <tfoot><tr><th>Pontuação Total</th><th>{{ result.get_total_score }}</th></tr></tfoot>
-      </table>
-    </div>
+        </div>
+      </div>
+    </details>
   {% empty %}
-    <p>Ainda não completou nenhuma avaliação.</p>
+    <p>Ainda não há avaliações concluídas.</p>
   {% endfor %}
-  
+
   <br>
-  <a href="{% url 'assessment_list' %}">Ver avaliações disponíveis</a>
-  <a href="{% url 'home' %}">Voltar para a Home</a>
+  <a href="{% url 'home' %}" class="button">Voltar para Home</a>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('evolutionChart');
+        if (!ctx) return;
+
+        // Invertemos os dados com 'reversed' para o gráfico ir da esquerda (antigo) para a direita (novo)
+        const labels = [{% for r in results  %}"{{ r.completed_at|date:'d/m' }}",{% endfor %}];
+        const dataPoints = [{% for r in results  %}{{ r.get_total_score }},{% endfor %}];
+
+        const evolutionChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Pontos Totais',
+                    data: dataPoints,
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, max: 40 }
+                }
+            }
+        });
+
+        // TRUQUE PARA RENDERIZAR AO ABRIR:
+        // Como o gráfico começa escondido, precisamos avisar ao Chart.js para se redimensionar ao abrir
+        document.querySelector('.chart-accordion').addEventListener('toggle', function() {
+            if (this.open) {
+                evolutionChart.resize();
+            }
+        });
+    });
+  </script>
 {% endblock %}
