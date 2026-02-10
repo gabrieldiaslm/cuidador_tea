@@ -21,9 +21,8 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            # Ao se cadastrar, cria um perfil padrão e redireciona para a home
-            Profile.objects.create(user=user, name=user.username)
-            return redirect('profile_select')
+            
+            return redirect('profile_create') 
     else:
         form = UserCreationForm()
     return render(request, 'core/signup.html', {'form': form})
