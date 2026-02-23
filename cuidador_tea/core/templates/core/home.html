@@ -1,8 +1,8 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-  <h1>Bem-vindo(a), {{ profile.name }}!</h1>
-  <p>Este é o conteúdo principal da plataforma.</p>
+  <h1>Desenvolvimento de {{ profile.name }}</h1>
+  <p>Nesta página podemos iniciar uma avaliação, ver o histórico de monitoramento do desenvolvimento e gerir o perfil da criança.</p>
   <p><a href="{% url 'assessment_list' %}">Ver avaliações disponíveis</a></p>
   <p><a href="{% url 'assessment_history' %}">Ver histórico de avaliações</a></p>
   
