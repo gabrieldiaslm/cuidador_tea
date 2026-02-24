@@ -5,7 +5,6 @@ const ASSETS_TO_CACHE = [
   OFFLINE_URL,
   '/static/css/style.css',
   '/static/images/tea.png',
-  '/static/images/tea.png'
 ];
 
 self.addEventListener('install', (event) => {
