@@ -36,3 +36,39 @@
     <button type="submit">Finalizar Avaliação</button>
   </form>
 {% endblock %}
+<script>
+    const form = document.querySelector('form');
+    
+    form.addEventListener('submit', function(e) {
+        // Se estiver offline, impedimos o envio normal e guardamos no "cofre"
+        if (!navigator.onLine) {
+            e.preventDefault();
+            
+            // 1. Capturamos os dados do formulário
+            const formData = new FormData(form);
+            const answers = {};
+            formData.forEach((value, key) => {
+                if (key.startsWith('question_')) {
+                    answers[key] = value;
+                }
+            });
+
+            // 2. Criamos o "envelope" da avaliação
+            const offlineData = {
+                assessment_id: "{{ assessment.id }}",
+                answers: answers,
+                timestamp: new Date().getTime()
+            };
+
+            // 3. Guardamos na fila de espera do localStorage
+            let queue = JSON.parse(localStorage.getItem('offline_evaluations') || '[]');
+            queue.push(offlineData);
+            localStorage.setItem('offline_evaluations', JSON.stringify(queue));
+
+            alert('📡 Você está sem internet! A avaliação foi guardada no telemóvel e será enviada automaticamente assim que a conexão voltar.');
+            
+            // Redireciona para a home para não ficar preso na página
+            window.location.href = "{% url 'home' %}";
+        }
+    });
+</script>

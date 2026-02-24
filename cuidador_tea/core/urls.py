@@ -37,4 +37,6 @@ urlpatterns = [
     path('history/', views.assessment_history, name='assessment_history'),
     # PWA OFFLINE
     path('offline/', views.offline, name='offline'),
+    #rota para sync
+    path('api/sync-assessment/', views.sync_offline_assessment, name='sync_assessment'),
 ]

@@ -1,14 +1,13 @@
-# core/views.py
+import json
 from .models import Assessment, Section, AssessmentResult, SectionResult
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+from django.http import JsonResponse
 from .models import Profile
 from .forms import ProfileForm # Criaremos este formulário a seguir
 from .models import Assessment, AssessmentResult, SectionResult
-
-
 def index(request):
     """Redireciona para a home se estiver logado, senão para o login."""
     if request.user.is_authenticated:
@@ -179,3 +178,59 @@ def profile_delete(request, profile_id):
 def offline(request):
     """Página exibida pelo Service Worker quando o utilizador está sem internet."""
     return render(request, 'core/offline.html')
+
+@login_required
+@profile_required
+def sync_offline_assessment(request):
+    """
+    API para receber os dados da avaliação guardados no modo offline.
+    Espera receber um JSON com o ID da avaliação e as respostas.
+    """
+    if request.method == 'POST':
+        try:
+            # 1. Lemos os dados que o JavaScript vai enviar escondido
+            data = json.loads(request.body)
+            assessment_id = data.get('assessment_id')
+            answers = data.get('answers', {}) # Dicionário com {'question_1': '2', 'question_2': '0'}
+
+            # 2. Resgatamos o perfil e a avaliação
+            profile = Profile.objects.get(id=request.session['selected_profile_id'])
+            assessment = get_object_or_404(Assessment, id=assessment_id)
+
+            # 3. Criamos o registo principal (igual à view original)
+            assessment_result = AssessmentResult.objects.create(
+                profile=profile,
+                assessment=assessment
+            )
+
+            # 4. Calculamos as notas por seção com base no JSON recebido
+            for section in assessment.sections.all():
+                section_score = 0
+                for question in section.questions.all():
+                    # Procuramos a resposta no dicionário que veio do telemóvel
+                    answer_value = answers.get(f'question_{question.id}')
+                    if answer_value is not None:
+                        section_score += int(answer_value)
+                
+                # Guardamos a nota da seção
+                SectionResult.objects.create(
+                    assessment_result=assessment_result,
+                    section=section,
+                    score=section_score
+                )
+
+            # 5. Em vez de redirecionar (redirect), devolvemos um "OK" para o Javascript
+            return JsonResponse({
+                'status': 'success', 
+                'message': 'Avaliação sincronizada com sucesso!'
+            })
+
+        except Exception as e:
+            # Se algo der errado (ex: formato inválido), avisamos o telemóvel
+            return JsonResponse({
+                'status': 'error', 
+                'message': str(e)
+            }, status=400)
+
+    # Se alguém tentar aceder a esta rota pelo navegador (GET), bloqueamos
+    return JsonResponse({'status': 'invalid_method'}, status=405)

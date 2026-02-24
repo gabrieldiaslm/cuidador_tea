@@ -46,6 +46,46 @@
                 });
             });
         });
+
+        // Função para enviar os dados guardados para a API que criámos no Django
+        async function syncOfflineData() {
+            const queue = JSON.parse(localStorage.getItem('offline_evaluations') || '[]');
+            
+            if (queue.length === 0) return;
+
+            console.log(`Sincronizando ${queue.length} avaliações pendentes...`);
+
+            for (const data of queue) {
+                try {
+                    const response = await fetch("{% url 'sync_assessment' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}' // Vital para o Django aceitar
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (response.ok) {
+                        console.log('Avaliação sincronizada com sucesso!');
+                    }
+                } catch (error) {
+                    console.error('Erro ao sincronizar:', error);
+                }
+            }
+
+            // Limpa a fila após tentar sincronizar tudo
+            localStorage.removeItem('offline_evaluations');
+            alert('Sucesso! As suas avaliações feitas offline foram sincronizadas.');
+        }
+
+        // Ouve o evento de "voltou a internet"
+        window.addEventListener('online', syncOfflineData);
+
+        // Também tenta sincronizar assim que a página carrega (caso já esteja online)
+        window.addEventListener('load', () => {
+            if (navigator.onLine) syncOfflineData();
+        });
     </script>
 </body>
 </html>
