@@ -35,4 +35,6 @@ urlpatterns = [
     path('assessments/', views.assessment_list, name='assessment_list'),
     path('assessments/<int:assessment_id>/take/', views.take_assessment, name='take_assessment'),
     path('history/', views.assessment_history, name='assessment_history'),
+    # PWA OFFLINE
+    path('offline/', views.offline, name='offline'),
 ]

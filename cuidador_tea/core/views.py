@@ -175,3 +175,7 @@ def profile_delete(request, profile_id):
         
     # Podemos continuar a usar o mesmo template de confirmação, mas vamos mudar o texto nele.
     return render(request, 'core/profile_delete_confirm.html', {'profile': profile})
+
+def offline(request):
+    """Página exibida pelo Service Worker quando o utilizador está sem internet."""
+    return render(request, 'core/offline.html')

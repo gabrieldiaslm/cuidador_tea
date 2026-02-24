@@ -1,8 +1,13 @@
-{% load static %}  <!DOCTYPE html>
+{% load static %}
+{% load pwa %} <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Cuidador TEA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Cuidador TEA</title>
+    
+    {% progressive_web_app_meta %}
+    
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
@@ -11,7 +16,7 @@
         {% endblock %}
     </main>
 
-<script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Seleciona todos os botões de informação
             const infoButtons = document.querySelectorAll('.info-btn');
@@ -42,7 +47,5 @@
             });
         });
     </script>
-
 </body>
-
 </html>

@@ -39,9 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core',
+    'pwa'
 ]
 
 MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -98,7 +101,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'
 
 TIME_ZONE = 'America/Sao_Paulo'
 
@@ -118,3 +121,28 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'profile_select'
+
+# ==============================================
+
+# Configurações do PWA
+PWA_APP_NAME = 'Cuidador TEA'
+PWA_APP_SHORT_NAME = 'CuidadorTEA'
+PWA_APP_DESCRIPTION = "Plataforma de acompanhamento para cuidadores de crianças com autismo."
+PWA_APP_THEME_COLOR = '#007bff'  
+PWA_APP_BACKGROUND_COLOR = '#ffffff'
+PWA_APP_START_URL = '/'
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_ORIENTATION = 'portrait'
+
+PWA_APP_ICONS = [
+    {
+        'src': '/static/images/tea.png',
+        'sizes': '192x192'
+    },
+    {
+        'src': '/static/images/tea.png',
+        'sizes': '512x512'
+    }
+]
+
+PWA_SERVICE_WORKER_PATH = BASE_DIR / 'static' / 'sw.js'
