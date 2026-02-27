@@ -99,7 +99,6 @@
         const ctx = document.getElementById('evolutionChart');
         if (!ctx) return;
 
-        // Invertemos os dados com 'reversed' para o gráfico ir da esquerda (antigo) para a direita (novo)
         const labels = [{% for r in results  %}"{{ r.completed_at|date:'d/m' }}",{% endfor %}];
         const dataPoints = [{% for r in results  %}{{ r.get_total_score }},{% endfor %}];
 
@@ -126,8 +125,6 @@
             }
         });
 
-        // TRUQUE PARA RENDERIZAR AO ABRIR:
-        // Como o gráfico começa escondido, precisamos avisar ao Chart.js para se redimensionar ao abrir
         document.querySelector('.chart-accordion').addEventListener('toggle', function() {
             if (this.open) {
                 evolutionChart.resize();

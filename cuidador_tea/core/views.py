@@ -1,13 +1,19 @@
 import json
-from .models import Assessment, Section, AssessmentResult, SectionResult
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.http import JsonResponse
-from .models import Profile
-from .forms import ProfileForm # Criaremos este formulário a seguir
-from .models import Assessment, AssessmentResult, SectionResult
+from .models import Assessment, Section, AssessmentResult, SectionResult, Profile
+from .forms import ProfileForm 
+
+def profile_required(view_func):
+    def _wrapped_view(request, *args, **kwargs):
+        if 'selected_profile_id' not in request.session:
+            return redirect('profile_select')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
 def index(request):
     """Redireciona para a home se estiver logado, senão para o login."""
     if request.user.is_authenticated:
@@ -20,7 +26,6 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            
             return redirect('profile_create') 
     else:
         form = UserCreationForm()
@@ -28,13 +33,11 @@ def signup(request):
 
 @login_required
 def profile_select(request):
-    """Exibe a tela 'selecionar perfil?'."""
     profiles = request.user.profiles.filter(is_active=True)
     return render(request, 'core/profile_select.html', {'profiles': profiles})
 
 @login_required
 def select_profile_and_redirect(request, profile_id):
-    """Salva o perfil na sessão e redireciona para a home."""
     profile = get_object_or_404(Profile, id=profile_id, user=request.user)
     request.session['selected_profile_id'] = profile.id
     return redirect('home')
@@ -44,9 +47,8 @@ def profile_create(request):
     """Cria um novo perfil para o usuário logado."""
     if request.method == 'POST':
         form = ProfileForm(request.POST)
-        # Limita o número de perfis por usuário (ex: 5)
+        # Limita o número de perfis por usuário
         if request.user.profiles.count() >= 5:
-            # Adicionar uma mensagem de erro aqui seria uma boa prática
             return redirect('profile_select')
         
         if form.is_valid():
@@ -59,40 +61,18 @@ def profile_create(request):
     return render(request, 'core/profile_form.html', {'form': form})
 
 @login_required
+@profile_required
 def home(request):
     """Página principal, acessível apenas após selecionar um perfil."""
     try:
         selected_profile_id = request.session.get('selected_profile_id')
-        if not selected_profile_id:
-            return redirect('profile_select') # Se não houver perfil na sessão, volta pra seleção
-        
-        profile = Profile.objects.get(id=selected_profile_id, user=request.user)
-        # Agora você pode usar o objeto 'profile' para filtrar conteúdo, etc.
-        return render(request, 'core/home.html', {'profile': profile})
-    except Profile.DoesNotExist:
-        # Caso o perfil na sessão seja inválido
-        del request.session['selected_profile_id']
-        return redirect('profile_select')
-# Decorator auxiliar para garantir que um perfil foi selecionado
-def profile_required(view_func):
-    def _wrapped_view(request, *args, **kwargs):
-        if 'selected_profile_id' not in request.session:
-            return redirect('profile_select')
-        return view_func(request, *args, **kwargs)
-    return _wrapped_view
-
-# Modifique a view 'home' para usar o decorator
-@login_required
-@profile_required
-def home(request):
-    try:
-        selected_profile_id = request.session.get('selected_profile_id')
         profile = Profile.objects.get(id=selected_profile_id, user=request.user)
         return render(request, 'core/home.html', {'profile': profile})
     except Profile.DoesNotExist:
-        del request.session['selected_profile_id']
+        # Previne KeyError ao tentar deletar uma chave que não existe
+        if 'selected_profile_id' in request.session:
+            del request.session['selected_profile_id']
         return redirect('profile_select')
-
 
 # Novas views para avaliações
 @login_required
@@ -138,11 +118,11 @@ def assessment_history(request):
     return render(request, 'core/assessment_history.html', {'results': results, 'profile': profile})
 
 # CRUD PERFIL --------
+
 # READ - Ver Detalhes do Perfil
 @login_required
 def profile_detail(request, profile_id):
     profile = get_object_or_404(Profile, id=profile_id, user=request.user, is_active=True)
-    # A verificação 'user=request.user' garante que um utilizador não pode ver perfis de outra conta
     return render(request, 'core/profile_detail.html', {'profile': profile})
 
 # UPDATE - Editar Perfil
@@ -151,13 +131,11 @@ def profile_update(request, profile_id):
     profile = get_object_or_404(Profile, id=profile_id, user=request.user, is_active=True)
     
     if request.method == 'POST':
-        # Passamos 'instance=profile' para que o formulário saiba que está a editar um perfil existente
         form = ProfileForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()
-            return redirect('profile_select') # Volta para a seleção de perfis após salvar
+            return redirect('profile_select') 
     else:
-        # Quando a página é carregada (GET), o formulário é preenchido com os dados atuais do perfil
         form = ProfileForm(instance=profile)
         
     return render(request, 'core/profile_form.html', {'form': form, 'is_editing': True})
@@ -172,7 +150,6 @@ def profile_delete(request, profile_id):
         profile.save()
         return redirect('profile_select')
         
-    # Podemos continuar a usar o mesmo template de confirmação, mas vamos mudar o texto nele.
     return render(request, 'core/profile_delete_confirm.html', {'profile': profile})
 
 def offline(request):
@@ -188,49 +165,40 @@ def sync_offline_assessment(request):
     """
     if request.method == 'POST':
         try:
-            # 1. Lemos os dados que o JavaScript vai enviar escondido
             data = json.loads(request.body)
             assessment_id = data.get('assessment_id')
-            answers = data.get('answers', {}) # Dicionário com {'question_1': '2', 'question_2': '0'}
+            answers = data.get('answers', {})
 
-            # 2. Resgatamos o perfil e a avaliação
             profile = Profile.objects.get(id=request.session['selected_profile_id'])
             assessment = get_object_or_404(Assessment, id=assessment_id)
 
-            # 3. Criamos o registo principal (igual à view original)
             assessment_result = AssessmentResult.objects.create(
                 profile=profile,
                 assessment=assessment
             )
 
-            # 4. Calculamos as notas por seção com base no JSON recebido
             for section in assessment.sections.all():
                 section_score = 0
                 for question in section.questions.all():
-                    # Procuramos a resposta no dicionário que veio do telemóvel
                     answer_value = answers.get(f'question_{question.id}')
                     if answer_value is not None:
                         section_score += int(answer_value)
                 
-                # Guardamos a nota da seção
                 SectionResult.objects.create(
                     assessment_result=assessment_result,
                     section=section,
                     score=section_score
                 )
 
-            # 5. Em vez de redirecionar (redirect), devolvemos um "OK" para o Javascript
             return JsonResponse({
                 'status': 'success', 
                 'message': 'Avaliação sincronizada com sucesso!'
             })
 
         except Exception as e:
-            # Se algo der errado (ex: formato inválido), avisamos o telemóvel
             return JsonResponse({
                 'status': 'error', 
                 'message': str(e)
             }, status=400)
 
-    # Se alguém tentar aceder a esta rota pelo navegador (GET), bloqueamos
     return JsonResponse({'status': 'invalid_method'}, status=405)

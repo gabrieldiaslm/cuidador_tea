@@ -58,8 +58,8 @@ class Question(models.Model):
     section = models.ForeignKey(Section, on_delete=models.CASCADE, related_name='questions')
     text = models.CharField(max_length=500, verbose_name="Texto da Pergunta")
     info_text = models.TextField(
-        blank=True, # O campo é opcional
-        null=True,  # Permite que o campo seja nulo na base de dados
+        blank=True,
+        null=True,
         verbose_name="Texto de Informação (Ajuda)",
         help_text="Este texto aparecerá quando o utilizador clicar no botão 'i'."
     )
@@ -78,7 +78,6 @@ class AssessmentResult(models.Model):
         return sum(result.score for result in self.section_results.all())
     
 def get_previous_result(self):
-        """Busca a última avaliação deste perfil antes da atual"""
         return AssessmentResult.objects.filter(
             profile=self.profile,
             assessment=self.assessment,
@@ -91,7 +90,6 @@ class SectionResult(models.Model):
     score = models.IntegerField(verbose_name="Pontuação")
 
     def get_tip(self):
-        """Retorna a dica baseada na pontuação obtida na secção"""
         if self.score <= 4:
             return self.section.tip_low
         elif self.score <= 6:
@@ -100,7 +98,6 @@ class SectionResult(models.Model):
             return self.section.tip_high
     
 def get_comparison(self):
-        """Calcula a diferença de nota com a avaliação anterior"""
         prev_assessment = self.assessment_result.get_previous_result()
         if prev_assessment:
             prev_sec_res = SectionResult.objects.filter(
